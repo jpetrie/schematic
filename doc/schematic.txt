@@ -1,0 +1,88 @@
+*schematic.txt*                                    Provides project information.
+==============================================================================
+INTRODUCTION                                                         *schematic*
+
+Schematic is a Neovim plugin that provides project configuration and target
+information with the intent that you will use it to further customize Neovim's
+behavior based on the specific needs of a project.
+
+
+CONFIGURATION
+Schematic supports the following options:
+
+                                             *schematic.options.schematic_files*
+    schematic_files: ~
+      A list of file names that contain project definition information for
+      Schematic. The first file found in an upwards directory traveral from
+      the working directory will be used.
+
+      The default value is `{"schematic.json"}`.
+
+                                           *schematic.options.on_project_loaded*
+    on_project_loaded: ~
+      A callback invoked when the active project is loaded.
+
+
+SCHEMATIC JSON FILE                                             *schematic.json*
+A `schematic.json` file sits at the root of a project's directory and 
+describes the project's configurations and targets. An example `schematic.json`
+file looks like:
+>
+  {
+    "name": "Your Project Name",
+    "configs": [
+      {
+        "name": "Debug",
+        "directory": "Build/Debug"
+      },
+      {
+        "name": "Release",
+        "directory": "Build/Release"
+      }
+    ],
+    "targets": [
+      {
+        "name": "SomeApp",
+        "path": "${config.directory}/Output/SomeApp.app"
+      }
+    ]
+  }
+<
+
+COMMANDS                                                    *schematic.commands*
+Schematic provides two commands:
+
+:Config {name}                                                         *:Config*
+    Sets the active configuration for the project to {name}.
+
+:Target {name}                                                         *:Target*
+    Sets the active target for the project to {name}.
+
+
+LUA API                                                          *schematic.api*
+schematic.load({path})
+    Locates the project relevant to {path}, loads project information (or
+    returns cached information) and returns the table containing information.
+
+    {path} may be omitted, in which case Neovim's current directory is used.
+
+schematic.project()
+    Returns the project table for the current directory, or `nil`.
+
+schematic.config()
+    Returns the configuration table for the active project's current
+    configuration. If the project has no configurations defined, the function
+    returns `nil`.
+
+schematic.target()
+    Returns the configuration table for the active project's current target. If
+    the project has no targets defined, the function returns `nil`.
+
+schematic.set_config({name})
+    Sets the current configuration for the active project to {name}, just as
+    with |:Config|.
+
+schematic.set_target({name})
+    Sets the current target for the active project to {name}, just as with
+    |:Target|.
+
