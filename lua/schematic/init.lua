@@ -94,6 +94,11 @@ function schematic.load(directory)
     end
 
     projects[root] = result
+
+    if schematic.options.on_project_loaded ~= nil then
+      schematic.options.on_project_loaded(result)
+    end
+
     return result
   end
 
@@ -146,9 +151,6 @@ end
 
 local function rescan()
   active_project = schematic.load(vim.loop.cwd())
-  if active_project ~= nil and schematic.options.on_project_loaded ~= nil then
-    schematic.options.on_project_loaded()
-  end
 end
 
 function schematic.setup(options)

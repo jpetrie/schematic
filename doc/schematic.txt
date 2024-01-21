@@ -20,7 +20,12 @@ Schematic supports the following options:
 
                                            *schematic.options.on_project_loaded*
     on_project_loaded: ~
-      A callback invoked when the active project is loaded.
+      A callback invoked when a project is loaded. The callback will be
+      passed the table that describes the loaded project. Schematic only
+      invokes the callback when a given project is first loaded. Subsequent
+      calls to |schematic.load()| for the same project will skip the callback.
+
+      The default value is `nil`.
 
 
 SCHEMATIC JSON FILE                                             *schematic.json*
@@ -60,28 +65,34 @@ Schematic provides two commands:
 
 
 LUA API                                                          *schematic.api*
+                                                              *schematic.load()*
 schematic.load({path})
     Locates the project relevant to {path}, loads project information (or
     returns cached information) and returns the table containing information.
 
     {path} may be omitted, in which case Neovim's current directory is used.
 
+                                                           *schematic.project()*
 schematic.project()
     Returns the project table for the current directory, or `nil`.
 
+                                                            *schematic.config()*
 schematic.config()
     Returns the configuration table for the active project's current
     configuration. If the project has no configurations defined, the function
     returns `nil`.
 
+                                                            *schematic.target()*
 schematic.target()
     Returns the configuration table for the active project's current target. If
     the project has no targets defined, the function returns `nil`.
 
+                                                        *schematic.set_config()*
 schematic.set_config({name})
     Sets the current configuration for the active project to {name}, just as
     with |:Config|.
 
+                                                        *schematic.set_target()*
 schematic.set_target({name})
     Sets the current target for the active project to {name}, just as with
     |:Target|.
