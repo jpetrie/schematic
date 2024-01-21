@@ -54,6 +54,7 @@ file looks like:
   }
 <
 
+
 COMMANDS                                                    *schematic.commands*
 Schematic provides two commands:
 
@@ -96,4 +97,20 @@ schematic.set_config({name})
 schematic.set_target({name})
     Sets the current target for the active project to {name}, just as with
     |:Target|.
+
+                                                       *schematic.project_table*
+A project table has the following public structure:
+>lua
+  {
+    name = ...,          -- The project name.
+    configs = [...],     -- A list of the project's configuration tables.
+    targets = [...],     -- A list of the project's target tables.
+    
+    config = function(), -- Gets the table of the active configuration.
+    target = function(), -- Gets the table of the active target.
+  }
+<
+
+Note that a project's `config()` and `target()` functions return a copy of
+the respective table after applying any placeholder substitutions.
 

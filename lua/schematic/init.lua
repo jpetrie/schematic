@@ -93,6 +93,24 @@ function schematic.load(directory)
       end
     end
 
+    result.config = function()
+      if result.active_config > 0 then
+        return result.configs[result.active_config]
+      end
+
+      return nil
+    end
+
+    result.target = function()
+      if result.active_target > 0 then
+        local processed = vim.deepcopy(result.targets[result.active_target])
+        processed.path = string.gsub(processed.path, "${config.directory}", result.config().directory)
+        return processed
+      end
+
+      return nil
+    end
+
     projects[root] = result
 
     if schematic.options.on_project_loaded ~= nil then
@@ -110,18 +128,16 @@ function schematic.project()
 end
 
 function schematic.config()
-  if active_project ~= nil and active_project.active_config > 0 then
-    return active_project.configs[active_project.active_config]
+  if active_project ~= nil then
+    return active_project.config()
   end
 
   return nil
 end
 
 function schematic.target()
-  if active_project ~= nil and active_project.active_target > 0 then
-    local result = vim.deepcopy(active_project.targets[active_project.active_target])
-    result.path = string.gsub(result.path, "${config.directory}", schematic.config().directory)
-    return result
+  if active_project ~= nil then
+    return active_project.target()
   end
 
   return nil
