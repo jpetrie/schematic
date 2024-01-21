@@ -63,6 +63,7 @@ function schematic.load(directory)
     local result = {
       name = json.name,
       root = root,
+      metadata = {},
     }
 
     result.configs = {}

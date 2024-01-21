@@ -108,6 +108,9 @@ A project table has the following public structure:
     
     config = function(), -- Gets the table of the active configuration.
     target = function(), -- Gets the table of the active target.
+
+    metadata = {},       -- An empty table that can be used to attach
+                         -- custom data to a project.
   }
 <
 
