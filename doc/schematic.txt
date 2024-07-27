@@ -1,0 +1,98 @@
+*schematic.txt*                                    Provides project information.
+==============================================================================
+INTRODUCTION                                                         *schematic*
+
+Schematic is a Neovim plugin that provides structured projects (with
+configuration and target information) similar to that of IDEs like Xcode or
+Visual Studio.
+
+
+CONFIGURATION
+Schematic supports the following options:
+
+                                             *schematic.options.schematic_files*
+    schematic_files: ~
+      A list of file names that contain project definition information for
+      Schematic. The first file found in an upwards directory traveral from
+      the working directory will be used.
+
+      The default value is `{"schematic.json"}`.
+
+                                                *schematic.options.on_activated*
+    on_activated: ~
+      A callback invoked when a project is activated. The callback will be
+      passed the table that describes the loaded project.
+
+      The default value is `nil`.
+
+
+SCHEMATIC JSON FILE                                             *schematic.json*
+A `schematic.json` file sits at the root of a project's directory and 
+describes the project's configurations and targets. An example `schematic.json`
+file looks like:
+>
+{
+  "name" : "My Project",
+  "configs": [
+    {
+      "name": "Debug",
+      "directory": "build/debug"
+    },
+  ],
+  "targets": [
+    {
+      "name": "My App",
+      "path": "${config.directory}/myapp"
+    },
+  ]
+}
+<
+
+Schematic files support placeholder replacement in targets. At runtime, the
+active target will have the following placeholders substituted:
+
+    `${config.directory}`  Replaced by the "directory" key of the project's
+                           active configuration.
+
+
+COMMANDS                                                    *schematic.commands*
+Schematic provides two commands:
+
+:Config {name}                                                         *:Config*
+    Sets the active configuration for the active project to {name}.
+
+:Target {name}                                                         *:Target*
+    Sets the active target for the active project to {name}.
+
+
+LUA API                                                          *schematic.api*
+                                                           *schematic.project()*
+schematic.project()
+    Returns the project table for the current directory, or `nil`.
+
+                                                       *schematic.project_table*
+A project table has the following structure:
+>lua
+{
+  name = "My Project",
+  root = "path/to/myproject"
+  metadata = {
+      -- An empty table you can insert arbitrary key-value data into.
+  },
+
+  configs = {
+      { name = "Debug" directory = "build/debug" },
+  },
+  config = {
+      -- A copy of the active configuration from the configs list.
+  }
+
+  targets = {
+      { name = "My App" path = "{$config.directory}/myapp" },
+  },
+  target = {
+      -- A copy of the active target from the targets list, with placeholders resolved.
+  }
+}
+<
+
