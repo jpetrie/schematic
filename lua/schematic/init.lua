@@ -105,10 +105,40 @@ local function command_config(command)
   end
 end
 
+local function command_config_completion(leading)
+  local results = {}
+  if active_project ~= nil then
+    for _, config in ipairs(active_project.configs) do
+      if vim.startswith(config.name, leading) then
+        table.insert(results, config.name)
+      end
+    end
+
+    table.sort(results)
+  end
+
+  return results
+end
+
 local function command_target(command)
   if active_project ~= nil then
     active_project:set_target(command.args)
   end
+end
+
+local function command_target_completion(leading)
+  local results = {}
+  if active_project ~= nil then
+    for _, target in ipairs(active_project.targets) do
+      if vim.startswith(target.name, leading) then
+        table.insert(results, target.name)
+      end
+    end
+
+    table.sort(results)
+  end
+
+  return results
 end
 
 function schematic.setup(options)
@@ -121,8 +151,8 @@ function schematic.setup(options)
     end
   end})
 
-  vim.api.nvim_create_user_command("Config", command_config, {nargs = 1})
-  vim.api.nvim_create_user_command("Target", command_target, {nargs = 1})
+  vim.api.nvim_create_user_command("Config", command_config, {nargs = 1, complete = command_config_completion})
+  vim.api.nvim_create_user_command("Target", command_target, {nargs = 1, complete = command_target_completion})
 end
 
 return schematic
