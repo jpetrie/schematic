@@ -25,21 +25,65 @@ function Project.new(name, root)
   return setmetatable(data, {__index = Project})
 end
 
-function Project:set_config(name)
-  for _, config in ipairs(self.configs) do
+local function get_state_root()
+  return vim.fn.expand(vim.fn.stdpath("data") .. "/schematic/")
+end
+
+local function set_project_config(project, name)
+  for _, config in ipairs(project.configs) do
     if name == config.name then
-      self.config = vim.deepcopy(config)
-      break
+      project.config = vim.deepcopy(config)
+      return true
     end
+  end
+
+  return false
+end
+
+local function set_project_target(project, name)
+  for _, target in ipairs(project.targets) do
+    if name == target.name then
+      project.target = vim.deepcopy(target)
+      project.target.path = string.gsub(project.target.path, "${config.directory}", project.config.directory)
+      return true
+    end
+  end
+
+  return false
+end
+
+function Project:set_config(name)
+  if set_project_config(self, name) then
+    self:save_state()
   end
 end
 
 function Project:set_target(name)
-  for _, target in ipairs(self.targets) do
-    if name == target.name then
-      self.target = vim.deepcopy(target)
-      self.target.path= string.gsub(self.target.path, "${config.directory}", self.config.directory)
-      break
+  if set_project_target(self, name) then
+    self:save_state()
+  end
+end
+
+function Project:save_state()
+  local root = get_state_root()
+  vim.fn.mkdir(root, "p")
+  local state = {
+    config = self.config.name,
+    target = self.target.name,
+  }
+
+  vim.fn.writefile({vim.json.encode(state)}, root .. self.name .. ".json")
+end
+
+function Project:load_state()
+  local root = get_state_root()
+  local file = root .. self.name .. ".json"
+  if vim.uv.fs_stat(file) then
+    local text = vim.fn.join(vim.fn.readfile(file), "")
+    local state = schematic.json_decode(text)
+    if state ~= nil then
+      set_project_config(self, state.config)
+      set_project_target(self, state.target)
     end
   end
 end
@@ -60,7 +104,7 @@ local function load(file)
 
     table.insert(project.configs, config)
     if project.config == nil then
-      project:set_config(config.name)
+      set_project_config(project, config.name)
     end
   end
 
@@ -72,10 +116,11 @@ local function load(file)
 
     table.insert(project.targets, target)
     if project.target == nil then
-      project:set_target(target.name)
+      set_project_target(project, target.name)
     end
   end
 
+  project:load_state()
   return project
 end
 
