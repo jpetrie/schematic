@@ -10,10 +10,6 @@ local schematic = {
 
 local active_project = nil
 
-function schematic.project()
-  return active_project
-end
-
 local Project = {}
 function Project.new(name, root)
   local data = {
@@ -139,6 +135,44 @@ local function command_target_completion(leading)
   end
 
   return results
+end
+
+function schematic.select_config()
+  if active_project ~= nil then
+    local options = {
+      prompt = "Select Configuration:",
+      format_item = function(item)
+        return item.name
+      end,
+    }
+
+    vim.ui.select(active_project.configs, options, function(choice, index)
+      if index ~= nil then
+        active_project:set_config(choice)
+      end
+    end)
+  end
+end
+
+function schematic.project()
+  return active_project
+end
+
+function schematic.select_target()
+  if active_project ~= nil then
+    local options = {
+      prompt = "Select Target:",
+      format_item = function(item)
+        return item.name
+      end,
+    }
+
+    vim.ui.select(active_project.targets, options, function(choice, index)
+      if index ~= nil then
+        active_project:set_target(choice)
+      end
+    end)
+  end
 end
 
 function schematic.setup(options)

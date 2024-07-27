@@ -70,6 +70,14 @@ LUA API                                                          *schematic.api*
 schematic.project()
     Returns the project table for the current directory, or `nil`.
 
+                                                     *schematic.select_config()*
+schematic.select_config()
+    Uses `vim.ui.select()` to prompt for the configuration to set active.
+
+                                                     *schematic.select_target()*
+schematic.select_target()
+    Uses `vim.ui.select()` to prompt for the target to set active.
+
                                                        *schematic.project_table*
 A project table has the following structure:
 >lua
