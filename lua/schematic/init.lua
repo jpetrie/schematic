@@ -97,7 +97,11 @@ end
 
 local function command_config(command)
   if active_project ~= nil then
-    active_project:set_config(command.args)
+    if #command.args > 0 then
+      active_project:set_config(command.args)
+    else
+      schematic.select_config()
+    end
   end
 end
 
@@ -118,7 +122,11 @@ end
 
 local function command_target(command)
   if active_project ~= nil then
-    active_project:set_target(command.args)
+    if #command.args > 0 then
+      active_project:set_target(command.args)
+    else
+      schematic.select_target()
+    end
   end
 end
 
@@ -185,8 +193,8 @@ function schematic.setup(options)
     end
   end})
 
-  vim.api.nvim_create_user_command("Config", command_config, {nargs = 1, complete = command_config_completion})
-  vim.api.nvim_create_user_command("Target", command_target, {nargs = 1, complete = command_target_completion})
+  vim.api.nvim_create_user_command("Config", command_config, {nargs = "?", complete = command_config_completion})
+  vim.api.nvim_create_user_command("Target", command_target, {nargs = "?", complete = command_target_completion})
 end
 
 return schematic

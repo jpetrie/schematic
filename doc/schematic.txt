@@ -59,10 +59,12 @@ COMMANDS                                                    *schematic.commands*
 Schematic provides two commands:
 
 :Config {name}                                                         *:Config*
-    Sets the active configuration for the active project to {name}.
+    Sets the active configuration for the active project to {name}. If {name}
+    is omitted, `vim.ui.select()` is used to prompt for the configuration.
 
 :Target {name}                                                         *:Target*
-    Sets the active target for the active project to {name}.
+    Sets the active target for the active project to {name}. If {name} is
+    omitted, `vim.ui.select()` is used to prompt for the target.
 
 
 LUA API                                                          *schematic.api*
