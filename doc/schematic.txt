@@ -18,6 +18,16 @@ Schematic supports the following options:
 
       The default value is `{"schematic.json"}`.
 
+                                             *schematic.options.use_task_runner*
+    use_task_runner: ~
+      Indicates the task runner integration to use for setting up clean and
+      build tasks. May be one of:
+
+      nil         Use Neovim's shell execution (`:!`) to run tasks.
+      "overseer"  Use overseen.nvim to run tasks.
+
+      The default value is `nil`.
+
                                                 *schematic.options.on_activated*
     on_activated: ~
       A callback invoked when a project is activated. The callback will be
@@ -32,7 +42,11 @@ describes the project's configurations and targets. An example `schematic.json`
 file looks like:
 >
 {
-  "name" : "My Project",
+  "name": "My Project",
+  "tasks": {
+    "clean": "make clean",
+    "build": "make ${target.name}",
+  },
   "configs": [
     {
       "name": "Debug",
@@ -48,8 +62,12 @@ file looks like:
 }
 <
 
-Schematic files support placeholder replacement in targets. At runtime, the
-active target will have the following placeholders substituted:
+Schematic files support placeholder replacement in tasks and targets. At
+runtime the active target and its tasks will have the following placeholders
+substituted:
+
+    `${target.name}`       Replaced by the "name" key of the project's active
+                           target.
 
     `${config.directory}`  Replaced by the "directory" key of the project's
                            active configuration.
@@ -98,7 +116,14 @@ A project table has the following structure:
   }
 
   targets = {
-      { name = "My App" path = "{$config.directory}/myapp" },
+    {
+      name = "My App"
+      path = "{$config.directory}/myapp",
+      tasks = {
+        clean = "make clean",
+        build = "make myapp",
+      },
+    },
   },
   target = {
       -- A copy of the active target from the targets list, with placeholders resolved.

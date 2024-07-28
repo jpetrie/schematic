@@ -2,6 +2,8 @@ local schematic = {
   options = {
     schematic_files = {"schematic.json"},
 
+    use_task_runner = nil,
+
     on_activated = nil,
   },
 
@@ -16,6 +18,10 @@ function Project.new(name, root)
     name = name,
     root = root,
     metadata = {},
+    tasks = {
+      build = nil,
+      clean = nil,
+    },
     configs = {},
     config = nil,
     targets = {},
@@ -40,11 +46,20 @@ local function set_project_config(project, name)
   return false
 end
 
+local function substitute_placeholders(value, project)
+  value = string.gsub(value, "${config.directory}", project.config.directory)
+  value = string.gsub(value, "${target.name}", project.target.name)
+
+  return value
+end
+
 local function set_project_target(project, name)
   for _, target in ipairs(project.targets) do
     if name == target.name then
       project.target = vim.deepcopy(target)
-      project.target.path = string.gsub(project.target.path, "${config.directory}", project.config.directory)
+      project.target.path = substitute_placeholders(project.target.path, project)
+      project.target.tasks.build = substitute_placeholders(project.tasks.build, project)
+      project.target.tasks.clean = substitute_placeholders(project.tasks.clean, project)
       return true
     end
   end
@@ -61,6 +76,24 @@ end
 function Project:set_target(name)
   if set_project_target(self, name) then
     self:save_state()
+  end
+end
+
+function Project:build()
+  local runner = schematic.options.use_task_runner
+  if runner == "overseer" then
+    require("overseer").run_template({name = "Build"})
+  else
+    vim.cmd("!" .. self.target.tasks.build)
+  end
+end
+
+function Project:clean()
+  local runner = schematic.options.use_task_runner
+  if runner == "overseer" then
+    require("overseer").run_template({name = "Clean"})
+  else
+    vim.cmd("!" .. self.target.tasks.clean)
   end
 end
 
@@ -96,6 +129,10 @@ local function load(file)
   end
 
   local project = Project.new(json.name, root)
+  for task, definition in pairs(json.tasks) do
+    project.tasks[task] = definition
+  end
+
   for _, definition in ipairs(json.configs) do
     local config = {
       name = definition.name,
@@ -112,6 +149,10 @@ local function load(file)
     local target = {
       name = definition.name,
       path = definition.path,
+      tasks = {
+        build = nil,
+        clean = nil,
+      }
     }
 
     table.insert(project.targets, target)
@@ -119,6 +160,7 @@ local function load(file)
       set_project_target(project, target.name)
     end
   end
+
 
   project:load_state()
   return project
@@ -230,6 +272,40 @@ end
 
 function schematic.setup(options)
   schematic.options = vim.tbl_extend("keep", options, schematic.options)
+
+  if schematic.options.use_task_runner == "overseer" then
+    -- Set up Overseer task templates for clean, build and run tasks.
+    local overseer = require("overseer")
+    overseer.register_template({
+      name = "Clean",
+      builder = function()
+        local project = schematic.project()
+        if project == nil then
+          return nil
+        end
+
+        return {
+          name = "Clean " .. project.target.name .. " (" .. project.config.name .. ")",
+          cmd = project.target.tasks.clean
+        }
+      end,
+    })
+
+    overseer.register_template({
+      name = "Build",
+      builder = function()
+        local project = schematic.project()
+        if project == nil then
+          return nil
+        end
+
+        return {
+          name = "Build " .. project.target.name .. " (" .. project.config.name .. ")",
+          cmd = project.target.tasks.build
+        }
+      end,
+    })
+  end
 
   vim.api.nvim_create_autocmd({"VimEnter", "DirChanged"}, {callback = function()
     active_project = scan()

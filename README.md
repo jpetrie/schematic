@@ -29,6 +29,10 @@ Schematic comes with the following default options. See `:help schematic` for mo
   -- A list of file names to search for which will provide the project schematics.
   schematic_files = {"schematic.json"},
 
+    -- Set up clean and build tasks using the following task runner. Requires the appropriate
+    -- plugin to be installed; see `:help schematic` for options.
+  use_task_runner = nil,
+
     -- A function called when a project is activated; called with the project's table.
   on_activated = nil,
 }
@@ -40,7 +44,12 @@ A Schematic JSON file looks like:
 
 ```json
 {
-  "name" : "My Project",
+  "name": "My Project",
+  "tasks":
+  {
+    "clean": "make clean",
+    "build": "make ${target.name}"
+  },
   "configs": [
     {
       "name": "Debug",
@@ -56,8 +65,8 @@ A Schematic JSON file looks like:
 }
 ```
 
-Within targets, the `${config.directory}` placeholder can be used; it will resolve to the directory of the active
-configuration when Schematic sets a target as active.
+Within targets and tasks, placeholders (such as `${target.name}` or `${config.directory}`) can be used; they will
+resolve to the appropriate values when Schematic sets a target as active.
 
 ## Projects
 
@@ -71,6 +80,11 @@ A project table created by Schematic has the following structure:
       -- An empty table you can insert arbitrary key-value data into.
   },
 
+  tasks = {
+    clean = "make clean",
+    build = "make ${target.name}",
+  },
+
   configs = {
       { name = "Debug" directory = "build/debug" },
   },
@@ -79,7 +93,7 @@ A project table created by Schematic has the following structure:
   }
 
   targets = {
-      { name = "My App" path = "{$config.directory}/myapp" },
+    { name = "My App" path = "{$config.directory}/myapp" },
   },
   target = {
       -- A copy of the active target from the targets list, with placeholders resolved.
