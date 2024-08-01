@@ -58,8 +58,15 @@ local function set_project_target(project, name)
     if name == target.name then
       project.target = vim.deepcopy(target)
       project.target.path = substitute_placeholders(project.target.path, project)
-      project.target.tasks.build = substitute_placeholders(project.tasks.build, project)
-      project.target.tasks.clean = substitute_placeholders(project.tasks.clean, project)
+
+      if project.target.tasks.build ~= nil then
+        project.target.tasks.build = substitute_placeholders(project.tasks.build, project)
+      end
+
+      if project.target.tasks.clean ~= nil then
+        project.target.tasks.clean = substitute_placeholders(project.tasks.clean, project)
+      end
+
       return true
     end
   end
@@ -129,8 +136,10 @@ local function load(file)
   end
 
   local project = Project.new(json.name, root)
-  for task, definition in pairs(json.tasks) do
-    project.tasks[task] = definition
+  if json.tasks ~= nil then
+    for task, definition in pairs(json.tasks) do
+      project.tasks[task] = definition
+    end
   end
 
   for _, definition in ipairs(json.configs) do
