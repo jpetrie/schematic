@@ -87,20 +87,32 @@ function Project:set_target(name)
 end
 
 function Project:build()
+  local command = self.target.tasks.build
+  if command == nil then
+    vim.notify("No build task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
+    return
+  end
+
   local runner = schematic.options.use_task_runner
   if runner == "overseer" then
     require("overseer").run_template({name = "Build"})
   else
-    vim.cmd("!" .. self.target.tasks.build)
+    vim.cmd("!" .. command)
   end
 end
 
 function Project:clean()
+  local command = self.target.tasks.clean
+  if command == nil then
+    vim.notify("No clean task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
+    return
+  end
+
   local runner = schematic.options.use_task_runner
   if runner == "overseer" then
     require("overseer").run_template({name = "Clean"})
   else
-    vim.cmd("!" .. self.target.tasks.clean)
+    vim.cmd("!" .. command)
   end
 end
 
