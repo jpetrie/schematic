@@ -50,6 +50,7 @@ end
 local function substitute_placeholders(value, project)
   value = string.gsub(value, "${config.directory}", project.config.directory)
   value = string.gsub(value, "${target.name}", project.target.name)
+  value = string.gsub(value, "${target.path}", project.target.path)
 
   return value
 end
