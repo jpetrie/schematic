@@ -59,11 +59,11 @@ local function set_project_target(project, name)
       project.target = vim.deepcopy(target)
       project.target.path = substitute_placeholders(project.target.path, project)
 
-      if project.target.tasks.build ~= nil then
+      if project.tasks.build ~= nil then
         project.target.tasks.build = substitute_placeholders(project.tasks.build, project)
       end
 
-      if project.target.tasks.clean ~= nil then
+      if project.tasks.clean ~= nil then
         project.target.tasks.clean = substitute_placeholders(project.tasks.clean, project)
       end
 
