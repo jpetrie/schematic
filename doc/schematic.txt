@@ -40,12 +40,13 @@ SCHEMATIC JSON FILE                                             *schematic.json*
 A `schematic.json` file sits at the root of a project's directory and 
 describes the project's configurations and targets. An example `schematic.json`
 file looks like:
->
+>json
 {
   "name": "My Project",
   "tasks": {
     "clean": "make clean",
     "build": "make ${target.name}",
+    "run": "${target.name}",
   },
   "configs": [
     {
@@ -118,10 +119,14 @@ A project table has the following structure:
   targets = {
     {
       name = "My App"
-      path = "{$config.directory}/myapp",
+      path = "${config.directory}/myapp",
       tasks = {
         clean = "make clean",
         build = "make myapp",
+
+        -- If a run task isn't specified in schematic.json, the task will default
+        -- to trying to execute the target's path.
+        run = "${config.directory}/myapp",
       },
     },
   },

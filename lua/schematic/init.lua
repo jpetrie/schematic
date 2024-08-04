@@ -19,8 +19,9 @@ function Project.new(name, root)
     root = root,
     metadata = {},
     tasks = {
-      build = nil,
       clean = nil,
+      build = nil,
+      run = nil,
     },
     configs = {},
     config = nil,
@@ -59,12 +60,19 @@ local function set_project_target(project, name)
       project.target = vim.deepcopy(target)
       project.target.path = substitute_placeholders(project.target.path, project)
 
+      if project.tasks.clean ~= nil then
+        project.target.tasks.clean = substitute_placeholders(project.tasks.clean, project)
+      end
+
       if project.tasks.build ~= nil then
         project.target.tasks.build = substitute_placeholders(project.tasks.build, project)
       end
 
-      if project.tasks.clean ~= nil then
-        project.target.tasks.clean = substitute_placeholders(project.tasks.clean, project)
+      if project.tasks.run ~= nil then
+        project.target.tasks.run = substitute_placeholders(project.tasks.run, project)
+      else
+        -- If no explicit run task is provided, default to simply executing the target.
+        project.target.tasks.run = project.target.path
       end
 
       return true
@@ -86,6 +94,21 @@ function Project:set_target(name)
   end
 end
 
+function Project:clean()
+  local command = self.target.tasks.clean
+  if command == nil then
+    vim.notify("No clean task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
+    return
+  end
+
+  local runner = schematic.options.use_task_runner
+  if runner == "overseer" then
+    require("overseer").run_template({name = "Clean"})
+  else
+    vim.cmd("!" .. command)
+  end
+end
+
 function Project:build()
   local command = self.target.tasks.build
   if command == nil then
@@ -101,16 +124,16 @@ function Project:build()
   end
 end
 
-function Project:clean()
-  local command = self.target.tasks.clean
+function Project:run()
+  local command = self.target.tasks.run
   if command == nil then
-    vim.notify("No clean task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
+    vim.notify("No run task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
     return
   end
 
   local runner = schematic.options.use_task_runner
   if runner == "overseer" then
-    require("overseer").run_template({name = "Clean"})
+    require("overseer").run_template({name = "Run"})
   else
     vim.cmd("!" .. command)
   end
@@ -171,8 +194,9 @@ local function load(file)
       name = definition.name,
       path = definition.path,
       tasks = {
-        build = nil,
         clean = nil,
+        build = nil,
+        run = nil,
       }
     }
 
@@ -323,6 +347,21 @@ function schematic.setup(options)
         return {
           name = "Build " .. project.target.name .. " (" .. project.config.name .. ")",
           cmd = project.target.tasks.build
+        }
+      end,
+    })
+
+    overseer.register_template({
+      name = "Run",
+      builder = function()
+        local project = schematic.project()
+        if project == nil then
+          return nil
+        end
+
+        return {
+          name = "Run " .. project.target.name .. " (" .. project.config.name .. ")",
+          cmd = project.target.tasks.run
         }
       end,
     })
