@@ -212,22 +212,6 @@ local function load(file)
   return project
 end
 
-local function scan(directory)
-  if #schematic.options.schematic_files == 0 then
-    return nil
-  end
-
-  directory = directory or vim.uv.cwd()
-
-  local files = vim.fs.find(schematic.options.schematic_files, {upward = true, path = directory, limit = 1})
-  if #files == 0 then
-    return nil
-  end
-
-  local file = files[1]
-  return load(file)
-end
-
 local function command_config(command)
   if active_project ~= nil then
     if #command.args > 0 then
@@ -316,6 +300,22 @@ function schematic.select_target()
   end
 end
 
+function schematic.scan(directory)
+  if #schematic.options.schematic_files == 0 then
+    return nil
+  end
+
+  directory = directory or vim.uv.cwd()
+
+  local files = vim.fs.find(schematic.options.schematic_files, {upward = true, path = directory, limit = 1})
+  if #files == 0 then
+    return nil
+  end
+
+  local file = files[1]
+  return load(file)
+end
+
 function schematic.setup(options)
   schematic.options = vim.tbl_extend("keep", options, schematic.options)
 
@@ -369,7 +369,7 @@ function schematic.setup(options)
   end
 
   vim.api.nvim_create_autocmd({"VimEnter", "DirChanged"}, {callback = function()
-    active_project = scan()
+    active_project = schematic.scan()
     if active_project ~= nil and schematic.options.on_activated ~= nil then
       schematic.options.on_activated(active_project)
     end

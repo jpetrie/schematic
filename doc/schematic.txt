@@ -99,6 +99,14 @@ schematic.select_config()
 schematic.select_target()
     Uses `vim.ui.select()` to prompt for the target to set active.
 
+                                                     *schematic.select_target()*
+                                                              *schematic.scan()*
+schematic.scan([directory])
+    Scans the specified directory (if omitted, the current directory is used)
+    and all parent directories for a valid Schematic file. If one is found, it
+    is loaded and the corresponding project table is returned. Otherwise, the
+    function returns nil.
+
                                                        *schematic.project_table*
 A project table has the following structure:
 >lua
