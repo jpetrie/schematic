@@ -99,7 +99,6 @@ schematic.select_config()
 schematic.select_target()
     Uses `vim.ui.select()` to prompt for the target to set active.
 
-                                                     *schematic.select_target()*
                                                               *schematic.scan()*
 schematic.scan([directory])
     Scans the specified directory (if omitted, the current directory is used)
