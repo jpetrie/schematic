@@ -134,7 +134,18 @@ function Project:run()
 
   local runner = schematic.options.use_task_runner
   if runner == "overseer" then
-    require("overseer").run_template({name = "Run"})
+    require("overseer").run_template({name = "Run", autostart = false}, function(task)
+      if task then
+        task:add_component({
+          "dependencies",
+          task_names = {
+            "Build"
+          },
+          sequential = true,
+        })
+        task:start()
+      end
+    end)
   else
     vim.cmd("!" .. command)
   end
