@@ -358,7 +358,8 @@ function schematic.setup(options)
 
         return {
           name = "Build " .. project.target.name .. " (" .. project.config.name .. ")",
-          cmd = project.target.tasks.build
+          cmd = project.target.tasks.build,
+          components = {"default", {"on_output_quickfix", open = true, close = true, items_only = true}},
         }
       end,
     })
