@@ -2,9 +2,13 @@ local schematic = {
   options = {
     schematic_files = {"schematic.json"},
 
-    use_task_runner = nil,
-
     on_activated = nil,
+
+    hooks = {
+      clean = nil,
+      build = nil,
+      run = nil,
+    }
   },
 
   json_decode = vim.json.decode,
@@ -95,60 +99,32 @@ function Project:set_target(name)
   end
 end
 
-function Project:clean()
-  local command = self.target.tasks.clean
+local function perform_project_task(project, action)
+  local command = project.target.tasks[action]
   if command == nil then
-    vim.notify("No clean task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
+    vim.notify("No " .. action .. " task for " .. project.target.name .. "/" .. project.config.name, vim.log.levels.ERROR)
     return
   end
 
-  local runner = schematic.options.use_task_runner
-  if runner == "overseer" then
-    require("overseer").run_template({name = "Clean"})
+  local hook = schematic.options.hooks[action]
+  if hook ~= nil then
+    hook(project)
   else
     vim.cmd("!" .. command)
   end
+
+end
+
+function Project:clean()
+  perform_project_task(self, "clean")
 end
 
 function Project:build()
-  local command = self.target.tasks.build
-  if command == nil then
-    vim.notify("No build task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
-    return
-  end
-
-  local runner = schematic.options.use_task_runner
-  if runner == "overseer" then
-    require("overseer").run_template({name = "Build"})
-  else
-    vim.cmd("!" .. command)
-  end
+  perform_project_task(self, "build")
 end
 
 function Project:run()
-  local command = self.target.tasks.run
-  if command == nil then
-    vim.notify("No run task for " .. self.target.name .. "/" .. self.config.name, vim.log.levels.ERROR)
-    return
-  end
-
-  local runner = schematic.options.use_task_runner
-  if runner == "overseer" then
-    require("overseer").run_template({name = "Run", autostart = false}, function(task)
-      if task then
-        task:add_component({
-          "dependencies",
-          task_names = {
-            "Build"
-          },
-          sequential = true,
-        })
-        task:start()
-      end
-    end)
-  else
-    vim.cmd("!" .. command)
-  end
+  perform_project_task(self, "run")
 end
 
 function Project:save_state()
@@ -329,56 +305,6 @@ end
 
 function schematic.setup(options)
   schematic.options = vim.tbl_extend("keep", options, schematic.options)
-
-  if schematic.options.use_task_runner == "overseer" then
-    -- Set up Overseer task templates for clean, build and run tasks.
-    local overseer = require("overseer")
-    overseer.register_template({
-      name = "Clean",
-      builder = function()
-        local project = schematic.project()
-        if project == nil then
-          return nil
-        end
-
-        return {
-          name = "Clean " .. project.target.name .. " (" .. project.config.name .. ")",
-          cmd = project.target.tasks.clean
-        }
-      end,
-    })
-
-    overseer.register_template({
-      name = "Build",
-      builder = function()
-        local project = schematic.project()
-        if project == nil then
-          return nil
-        end
-
-        return {
-          name = "Build " .. project.target.name .. " (" .. project.config.name .. ")",
-          cmd = project.target.tasks.build,
-          components = {"default", {"on_output_quickfix", open = true, close = true, items_only = true}},
-        }
-      end,
-    })
-
-    overseer.register_template({
-      name = "Run",
-      builder = function()
-        local project = schematic.project()
-        if project == nil then
-          return nil
-        end
-
-        return {
-          name = "Run " .. project.target.name .. " (" .. project.config.name .. ")",
-          cmd = project.target.tasks.run
-        }
-      end,
-    })
-  end
 
   vim.api.nvim_create_autocmd({"VimEnter", "DirChanged"}, {callback = function()
     active_project = schematic.scan()

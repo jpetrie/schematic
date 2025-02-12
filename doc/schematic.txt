@@ -19,14 +19,13 @@ Schematic supports the following options:
       The default value is `{"schematic.json"}`.
 
                                              *schematic.options.use_task_runner*
-    use_task_runner: ~
-      Indicates the task runner integration to use for setting up clean and
-      build tasks. May be one of:
+                                                       *schematic.options.hooks*
+    hooks: ~
+      A table of functions Schematic will call when tasks are invoked. Keys are
+      the same as the task keys in the `schematic.json` file. Values are Lua
+      functions that will be called with the table of the active project.
 
-      nil         Use Neovim's shell execution (`:!`) to run tasks.
-      "overseer"  Use overseen.nvim to run tasks.
-
-      The default value is `nil`.
+      Each key defaults to having a the value `nil`.
 
                                                 *schematic.options.on_activated*
     on_activated: ~
