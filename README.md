@@ -29,11 +29,19 @@ Schematic comes with the following default options. See `:help schematic` for mo
   -- A list of file names to search for which will provide the project schematics.
   schematic_files = {"schematic.json"},
 
-    -- Set up clean and build tasks using the following task runner. Requires the appropriate
-    -- plugin to be installed; see `:help schematic` for options.
-  use_task_runner = nil,
+  hooks = {
+    clean = function(project)
+      -- Code to execute when the 'clean' task is invoked.
+    end,
+    build = function(project)
+      -- Code to execute when the 'build' task is invoked.
+    end,
+    run = function(project)
+      -- Code to execute when the 'run' task is invoked.
+    end,
+  },
 
-    -- A function called when a project is activated; called with the project's table.
+  -- A function called when a project is activated; called with the project's table.
   on_activated = nil,
 }
 ```
