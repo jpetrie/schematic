@@ -8,6 +8,8 @@ local schematic = {
       clean = nil,
       build = nil,
       run = nil,
+      config_set = nil,
+      target_set = nil,
     }
   },
 
@@ -44,6 +46,12 @@ local function set_project_config(project, name)
   for _, config in ipairs(project.configs) do
     if name == config.name then
       project.config = vim.deepcopy(config)
+
+      local on_config_set = schematic.options.hooks.config_set
+      if on_config_set ~= nil then
+        on_config_set(project)
+      end
+
       return true
     end
   end
@@ -78,6 +86,11 @@ local function set_project_target(project, name)
       else
         -- If no explicit run task is provided, default to simply executing the target.
         project.target.tasks.run = project.target.path
+      end
+
+      local on_target_set = schematic.options.hooks.target_set
+      if on_target_set ~= nil then
+        on_target_set(project)
       end
 
       return true

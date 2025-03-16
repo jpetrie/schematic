@@ -21,11 +21,17 @@ Schematic supports the following options:
                                              *schematic.options.use_task_runner*
                                                        *schematic.options.hooks*
     hooks: ~
-      A table of functions Schematic will call when tasks are invoked. Keys are
-      the same as the task keys in the `schematic.json` file. Values are Lua
-      functions that will be called with the table of the active project.
+      A table of functions Schematic will call upon certain events. The
+      following keys (and their triggering events) are available:
 
-      Each key defaults to having a the value `nil`.
+        clean       The active target's clean task was invoked.
+        build       The active target's build task was invoked.
+        run         The active target's run task was invoked.
+        config_set  The active configuration has been changed.
+        target_set  The active target has been changed.
+
+      All values are Lua functions that will be called with the table of the
+      active project. Each key defaults to having a the value `nil`.
 
                                                 *schematic.options.on_activated*
     on_activated: ~
