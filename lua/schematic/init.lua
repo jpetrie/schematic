@@ -206,12 +206,10 @@ local function load(file)
   -- If the configuration and target remain unset after attempting to load the project state, try to default them to the
   -- first available options.
   if project.config == nil and #project.configs > 0 then
-    vim.print("Defaulting config to " .. project.configs[1].name)
     set_project_config(project, project.configs[1].name)
   end
 
   if project.target == nil and #project.configs > 0 then
-    vim.print("Defaulting target to " .. project.targets[1].name)
     set_project_target(project, project.targets[1].name)
   end
 
