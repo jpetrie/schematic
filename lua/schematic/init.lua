@@ -275,9 +275,9 @@ function schematic.select_config()
       end,
     }
 
-    vim.ui.select(active_project.configs, options, function(choice, index)
-      if index ~= nil then
-        active_project:set_config(choice)
+    vim.ui.select(active_project.configs, options, function(choice, _)
+      if choice ~= nil then
+        active_project:set_config(choice.name)
       end
     end)
   end
@@ -296,9 +296,9 @@ function schematic.select_target()
       end,
     }
 
-    vim.ui.select(active_project.targets, options, function(choice, index)
-      if index ~= nil then
-        active_project:set_target(choice)
+    vim.ui.select(active_project.targets, options, function(choice, _)
+      if choice ~= nil then
+        active_project:set_target(choice.name)
       end
     end)
   end
